@@ -1,0 +1,200 @@
+#nikollasp
+# -*- coding: utf-8 -*-
+# Sample Python code for youtube.liveChatMessages.list
+# See instructions for running these code samples locally:
+# https://developers.google.com/explorer-help/guides/code_samples#python
+
+import os
+import google_auth_oauthlib.flow
+import googleapiclient.discovery
+import googleapiclient.errors
+import json
+import smtplib
+from datetime import datetime
+import time
+global body
+body=''
+
+scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
+def auth():
+    global youtube
+ # Disable OAuthlib's HTTPS verification when running locally.
+    # *DO NOT* leave this option enabled in production.
+   
+ 
+      
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
+    api_service_name = "youtube"
+    api_version = "v3"
+    client_secrets_file = "YOUR_CLIENT_SECRET" #CHANGE, SOME FILE THAT THIS SCRIPT
+    
+
+    #AUTENTICATION
+    
+
+    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
+        client_secrets_file, scopes)
+    
+
+    credentials = flow.run_console()
+   
+            
+    youtube = googleapiclient.discovery.build(
+        api_service_name, api_version, credentials=credentials)
+           
+   
+
+
+def getLive():
+    #GET LiveChatID
+    global liveId
+    request = youtube.liveBroadcasts().list(
+        part="snippet",
+        broadcastStatus="active"
+    )
+    response = request.execute()
+    result = json.dumps(response)
+    python_obj = json.loads(result)
+    liveId=  python_obj["items"][0]["snippet"]["liveChatId"] 
+    
+    #GET LiveChatID
+    
+    
+
+def selectMessage():
+    global i
+    global body
+    
+    #GET COMMENT
+    request = youtube.liveChatMessages().list(
+        liveChatId=liveId,
+        part="snippet"
+    )
+ 
+    message = request.execute()
+    contComment(message)
+    #TESTE COMENTARIO
+    result = json.dumps(message)
+    python_obj = json.loads(result)
+    
+    
+    i=1 
+    for i in range(cont-1):    
+       
+        if "MESSAGE_KEY_TO_CAPTURE_ON_CHAT"  in python_obj["items"][i]["snippet"]["displayMessage"]: #CHANGE MESSAGEM KEY
+
+            body = body + "\n\nMensagem: " + " "+ python_obj["items"][i]["snippet"]["displayMessage"]
+            selectChannel(i)
+        else:
+            if "MESSAGE_KEY_TO_CAPTURE_ON_CHAT"  in python_obj["items"][i]["snippet"]["displayMessage"]: #CHANGE MESSAGEM KEY
+                body = body + "\n\nMensagem: " + " "+ python_obj["items"][i]["snippet"]["displayMessage"]
+                selectChannel(i)
+            else:
+                if "MESSAGE_KEY_TO_CAPTURE_ON_CHAT"  in python_obj["items"][i]["snippet"]["displayMessage"]: #CHANGE MESSAGEM KEY
+                    body = body + "\n\nMensagem: " + " "+ python_obj["items"][i]["snippet"]["displayMessage"]
+                    selectChannel(i)
+                else:
+                    if "MESSAGE_KEY_TO_CAPTURE_ON_CHAT"  in python_obj["items"][i]["snippet"]["displayMessage"]: #CHANGE MESSAGEM KEY
+                        body = body + "\n\nMensagem: " + " "+ python_obj["items"][i]["snippet"]["displayMessage"]
+                        selectChannel(i)
+                    else: 
+                        if "MESSAGE_KEY_TO_CAPTURE_ON_CHAT"  in python_obj["items"][i]["snippet"]["displayMessage"]: #CHANGE MESSAGEM KEY
+                            body = body + "\n\nMensagem: " + " "+ python_obj["items"][i]["snippet"]["displayMessage"]
+                            selectChannel(i)
+                        else:
+                            if "MESSAGE_KEY_TO_CAPTURE_ON_CHAT"  in python_obj["items"][i]["snippet"]["displayMessage"]: #CHANGE MESSAGEM KEY
+                                body = body + "\n\nMensagem: " + " "+ python_obj["items"][i]["snippet"]["displayMessage"]
+                                selectChannel(i)
+                                
+                            else:
+                                if "MESSAGE_KEY_TO_CAPTURE_ON_CHAT"  in python_obj["items"][i]["snippet"]["displayMessage"]: #CHANGE MESSAGEM KEY
+                                    body = body + "\n\nMensagem: " + " "+ python_obj["items"][i]["snippet"]["displayMessage"]
+                                    selectChannel(i)
+    body = body + "\n\nTotal de Comentários: " + " " + str(cont)
+                                  
+        
+        
+            
+        
+def selectChannel(i):
+    global body
+    request = youtube.liveChatMessages().list(
+        liveChatId=liveId,
+        part="snippet"
+    )
+    #CHANNEL
+    request = youtube.liveChatMessages().list(
+        liveChatId=liveId,
+        part="authorDetails"
+     )
+    channel = request.execute()
+    
+    result = json.dumps(channel)
+    python_obj = json.loads(result)
+    body = body + "\nCanal: " + " " + python_obj["items"][i]["authorDetails"]["displayName"]
+    
+
+
+def contComment(message):
+    result = json.dumps(message)
+    python_obj = json.loads(result)
+    global cont
+    cont = python_obj["pageInfo"]["totalResults"]
+    
+
+
+def sendEmail():
+    
+
+    gmail_user = 'EMAIL@DOMINIO.com' #CHANGE EMAIL VALID
+    gmail_password="YOUR PASSWORD" #CHANGE PASS
+    sent_from = gmail_user
+    to = ['DESTINATION@gmail.com','DESTINATION2@bol.com.br'] #DESTINATION PREFERENCE
+    subject = 'THIS IS YOUR SUBJECT' #SUBJECT
+    
+
+    email_text = """\
+    From: %s
+    To: %s
+    Subject:%s
+
+    %s
+    """ % (sent_from, ", ".join(to),subject, body)
+
+
+    try:
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465) #SMTP SENDER
+        server.ehlo()
+        server.login(gmail_user, gmail_password)
+
+        server.sendmail(sent_from, to, email_text.encode('iso-8859-1') )
+        server.close()
+
+        print ('Email sent!')
+
+    except:
+        print ('Something went wrong...') 
+
+
+def main():
+
+    #main
+    auth()
+    getLive()
+    selectMessage()
+    
+    sendEmail()
+    
+
+
+main()
+
+
+
+
+
+
+
+
+
