@@ -27,7 +27,7 @@ def auth():
 
     api_service_name = "youtube"
     api_version = "v3"
-    client_secrets_file = "YOUR_CLIENT_SECRET" #CHANGE, SOME FILE THAT THIS SCRIPT
+    client_secrets_file = "YOUR_CLIENT_SECRET" #CHANGE, SAME FOLDER THAT THIS SCRIPT
     
 
     #AUTENTICATION
